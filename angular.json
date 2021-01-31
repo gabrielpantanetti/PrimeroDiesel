@@ -119,6 +119,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "PrimeroDiesel"
+    }
+  },
+  "defaultProject": "PrimeroDiesel",
+  "cli": {
+    "analytics": false
+  }
 }
