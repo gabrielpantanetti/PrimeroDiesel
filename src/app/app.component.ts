@@ -1,38 +1,118 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild
+} from '@angular/core'
+import { FormControl, FormGroup, Validators } from '@angular/forms'
+import { EmailService } from './services/email.service'
 
-declare var $: any;
-declare function init($);
+declare var $: any
+declare function init ($)
+
+import Swal from 'sweetalert2'
+declare var bootbox: any
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
+export class AppComponent implements OnInit, AfterViewInit {
+  title = 'PrimeroDiesel'
 
-export class AppComponent implements OnInit {
-  title = 'PrimeroDiesel';
+  forma: FormGroup
+  submitted = false
 
-  @ViewChild('videoPlayer') videoplayer: any;
-
-  ngOnInit(): void {
-
-    // SLIDER
-    init($);
-
-    //this.videoplayer.nativeElement.play();
+  get f () {
+    return this.forma.controls
   }
 
-  closeSideNav() {
-    if ($("body").hasClass("mini-sidebar")) {
+  email: Object = {
+    nombre: '',
+    email: '',
+    message: ''
+  }
 
-      $("body").removeClass("show-sidebar");
-      $(".nav-toggler i").toggleClass("ti-close");
-      $(".nav-toggler i").addClass("ti-menu");
+  @ViewChild('videoPlayer', { static: false }) videoplayer: ElementRef
+
+  constructor (public _EmailService: EmailService) {}
+
+  ngOnInit (): void {
+    // SLIDER
+    init($)
+
+    this.initFormContact()
+  }
+
+  ngAfterViewInit () {
+    
+    const media = this.videoplayer.nativeElement;
+    media.muted = true; // without this line it's not working although I have "muted" in HTML
+    media.loop = true; // without this line it's not working although I have "muted" in HTML
+    media.play();
+
+  }
+
+  initFormContact () {
+    this.forma = new FormGroup({
+      nombre: new FormControl('', Validators.required),
+      email: new FormControl('', [Validators.required, Validators.email]),
+      message: new FormControl('', Validators.required)
+    })
+
+    this.forma.setValue(this.email)
+  }
+
+  SubmitContactForm () {
+    //console.log(this.forma);
+    //console.log(this.forma.value);
+
+    this.submitted = true
+
+    // stop here if form is invalid
+    if (this.forma.invalid) {
+      return
+    }
+
+    var dialog = bootbox.dialog({
+      message:
+        '<p class="text-center mb-0"><i class="fa fa-spin fa-cog"></i> Enviando email...</p>',
+      className: 'rubberBand animated',
+      closeButton: false
+    })
+
+    this._EmailService.sendMessage(this.forma.value).subscribe(() => {
+      // do something in the background
+      dialog.modal('hide')
+
+      //Swal("Formulario de contacto, Mensaje enviado correctamente");
+      Swal.fire({
+        //position: 'top-end',
+        type: 'success',
+        title: 'Mensaje enviado correctamente',
+        showConfirmButton: false,
+        timer: 1500
+      })
+    })
+
+    this.forma.controls['nombre'].reset()
+    this.forma.controls['email'].reset()
+    this.forma.controls['message'].reset()
+
+    this.forma.markAsPristine()
+    this.forma.markAsUntouched()
+    this.forma.updateValueAndValidity()
+
+    this.submitted = false
+  }
+
+  closeSideNav () {
+    if ($('body').hasClass('mini-sidebar')) {
+      $('body').removeClass('show-sidebar')
+      $('.nav-toggler i').toggleClass('ti-close')
+      $('.nav-toggler i').addClass('ti-menu')
     }
   }
-
-
-
-
-
 }

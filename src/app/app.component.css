@@ -465,3 +465,9 @@ form textarea {
   padding-left: 0;
   margin: 0 0 50px;
 }
+
+.divEnviarMail {
+  color: #ff6666;
+  margin-top: 68px;
+  text-align: left !important;
+}
